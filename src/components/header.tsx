@@ -30,7 +30,7 @@ export function Header() {
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 shadow-sm md:px-6">
       <SidebarTrigger />
       <div className="flex-1 flex items-center gap-4">
-        <h1 className="text-lg font-semibold hidden md:block text-slate-800">{currentTitle}</h1>
+        <h1 className="text-lg font-semibold hidden md:block text-foreground">{currentTitle}</h1>
       </div>
       <div className="flex items-center gap-4">
         <form className="relative hidden lg:flex items-center">

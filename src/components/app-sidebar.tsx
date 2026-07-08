@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Package, Calculator, Store, Settings, ChefHat } from 'lucide-react'
+import { Home, Package, Calculator, Store, Settings } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +13,7 @@ import {
   SidebarGroupLabel,
 } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
+import logoImg from '../assets/petiscosdasgeraisfrota-30-x-30-cm-1-copia-2-061c7.png'
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -28,9 +29,12 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b">
-        <Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary">
-          <ChefHat className="w-6 h-6" />
-          <span>FoodPrice</span>
+        <Link
+          to="/"
+          className="flex items-center gap-3 font-bold text-lg text-primary hover:opacity-90 transition-opacity"
+        >
+          <img src={logoImg} alt="Petiscos das Gerais" className="w-8 h-8 object-contain" />
+          <span className="truncate">Petiscos das Gerais</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -62,7 +66,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="p-4 border-t">
-        <div className="text-xs text-muted-foreground text-center">FoodPrice v0.0.1</div>
+        <div className="text-xs text-muted-foreground text-center">Petiscos das Gerais v1.0.0</div>
       </SidebarFooter>
     </Sidebar>
   )

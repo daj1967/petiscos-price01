@@ -21,7 +21,7 @@ const navItems = [
   { name: 'Calculadora', href: '/calculator', icon: Calculator },
   { name: 'Fichas Técnicas', href: '/recipes', icon: Store },
   { name: 'Relatórios', href: '/reports', icon: FileText },
-  { name: 'Configurações', href: '#', icon: Settings },
+  { name: 'Configurações', href: '/settings', icon: Settings },
 ]
 
 export function AppSidebar() {

@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/use-auth'
-import { createCalculation } from '@/services/calculations'
+import { createCalculation, updateCalculation, getCalculation } from '@/services/calculations'
 import { extractFieldErrors, getErrorMessage } from '@/lib/pocketbase/errors'
 import { formatCurrency } from '@/lib/utils'
 import { CalculatorForm } from '@/components/calculator-form'
@@ -26,7 +26,29 @@ export default function Calculator() {
   const { user } = useAuth()
   const [form, setForm] = useState<ProductPricing>(defaultProduct)
   const [isSaving, setIsSaving] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [searchParams] = useSearchParams()
   const result = useMemo(() => calculateAll(form), [form])
+
+  useEffect(() => {
+    const editId = searchParams.get('edit')
+    if (!editId) return
+    getCalculation(editId)
+      .then((record) => {
+        const data = record.ingredients_list as ProductPricing | null
+        if (data) {
+          setForm({ ...data })
+          setEditingId(record.id)
+        }
+      })
+      .catch(() => {
+        toast({
+          variant: 'destructive',
+          title: 'Erro',
+          description: 'Não foi possível carregar o cálculo.',
+        })
+      })
+  }, [searchParams, toast])
 
   const update = (field: keyof ProductPricing, value: string | number | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -56,18 +78,27 @@ export default function Calculator() {
     }
     setIsSaving(true)
     try {
-      await createCalculation({
+      const payload = {
         product_name: form.name,
         total_cost: result.totalCost,
         markup: form.profitPct,
         final_price: result.priceWithIcmsSt,
         ingredients_list: { ...form },
         user_id: user.id,
-      })
-      toast({
-        title: 'Preço Salvo!',
-        description: `${form.name}: ${formatCurrency(result.priceWithIcmsSt)} (c/ ICMS-ST)`,
-      })
+      }
+      if (editingId) {
+        await updateCalculation(editingId, payload)
+        toast({
+          title: 'Preço Atualizado!',
+          description: `${form.name}: ${formatCurrency(result.priceWithIcmsSt)} (c/ ICMS-ST)`,
+        })
+      } else {
+        await createCalculation(payload)
+        toast({
+          title: 'Preço Salvo!',
+          description: `${form.name}: ${formatCurrency(result.priceWithIcmsSt)} (c/ ICMS-ST)`,
+        })
+      }
     } catch (err) {
       const errors = extractFieldErrors(err)
       toast({
@@ -121,7 +152,13 @@ export default function Calculator() {
           <CalculatorForm form={form} update={update} />
         </div>
         <div className="md:col-span-4">
-          <CalculatorSummary result={result} form={form} onSave={handleSave} isSaving={isSaving} />
+          <CalculatorSummary
+            result={result}
+            form={form}
+            onSave={handleSave}
+            isSaving={isSaving}
+            isEditing={!!editingId}
+          />
         </div>
       </div>
 

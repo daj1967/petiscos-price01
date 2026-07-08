@@ -10,6 +10,7 @@ interface Props {
   form: ProductPricing
   onSave: () => void
   isSaving?: boolean
+  isEditing?: boolean
 }
 
 function Row({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
@@ -34,7 +35,7 @@ function VerbaRow({ label, value, pct }: { label: string; value: number; pct: nu
   )
 }
 
-export function CalculatorSummary({ result, form, onSave, isSaving }: Props) {
+export function CalculatorSummary({ result, form, onSave, isSaving, isEditing }: Props) {
   const isValid = result.priceWithIcmsSt > 0
   return (
     <Card className="sticky top-24 border-primary/20 shadow-elevation overflow-hidden">
@@ -91,7 +92,7 @@ export function CalculatorSummary({ result, form, onSave, isSaving }: Props) {
             </>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" /> Salvar
+              <Save className="mr-2 h-4 w-4" /> {isEditing ? 'Atualizar' : 'Salvar'}
             </>
           )}
         </Button>

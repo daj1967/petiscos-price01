@@ -13,6 +13,7 @@ import Calculator from './pages/Calculator'
 import Recipes from './pages/Recipes'
 import RecipeDetail from './pages/RecipeDetail'
 import Reports from './pages/Reports'
+import Settings from './pages/Settings'
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
               <Route path="/recipes" element={<Recipes />} />
               <Route path="/recipe/:id" element={<RecipeDetail />} />
               <Route path="/reports" element={<Reports />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

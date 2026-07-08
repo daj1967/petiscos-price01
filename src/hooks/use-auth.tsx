@@ -5,11 +5,13 @@ interface AuthUser {
   id: string
   email: string
   name?: string
+  role?: string
 }
 
 interface AuthContextType {
   isAuthenticated: boolean
   user: AuthUser | null
+  isAdmin: boolean
   login: (email: string, password: string) => Promise<void>
   signup: (email: string, password: string, name?: string) => Promise<void>
   logout: () => void
@@ -63,6 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       passwordConfirm: password,
       name: name || '',
+      role: 'User',
     })
     await pb.collection('users').authWithPassword(email, password)
   }
@@ -72,7 +75,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, signup, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        user,
+        isAdmin: user?.role === 'Admin',
+        login,
+        signup,
+        logout,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

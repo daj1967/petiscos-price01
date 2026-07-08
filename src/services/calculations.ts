@@ -32,6 +32,14 @@ export function createCalculation(data: CreateCalculationData) {
   return pb.collection('calculations').create<CalculationRecord>(data)
 }
 
+export function getCalculation(id: string) {
+  return pb.collection('calculations').getOne<CalculationRecord>(id)
+}
+
+export function updateCalculation(id: string, data: Partial<CreateCalculationData>) {
+  return pb.collection('calculations').update<CalculationRecord>(id, data)
+}
+
 export function deleteCalculation(id: string) {
   return pb.collection('calculations').delete(id)
 }

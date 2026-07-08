@@ -19,7 +19,7 @@ const navItems = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Produtos', href: '/products', icon: Package },
   { name: 'Calculadora', href: '/calculator', icon: Calculator },
-  { name: 'Canais Varejo', href: '#', icon: Store },
+  { name: 'Fichas Técnicas', href: '/recipes', icon: Store },
   { name: 'Configurações', href: '#', icon: Settings },
 ]
 

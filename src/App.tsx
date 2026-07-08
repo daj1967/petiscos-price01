@@ -9,6 +9,8 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import Products from './pages/Products'
 import Calculator from './pages/Calculator'
+import Recipes from './pages/Recipes'
+import RecipeDetail from './pages/RecipeDetail'
 import { AuthContext } from './hooks/use-auth'
 
 const App = () => {
@@ -35,6 +37,8 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/products" element={<Products />} />
               <Route path="/calculator" element={<Calculator />} />
+              <Route path="/recipes" element={<Recipes />} />
+              <Route path="/recipe/:id" element={<RecipeDetail />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

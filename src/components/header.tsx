@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/hooks/use-auth'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
+import logoImg from '../assets/petiscosdasgeraisfrota-30-x-30-cm-1-copia-2-061c7.png'
 
 export function Header() {
   const { logout } = useAuth()
@@ -29,6 +30,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 shadow-sm md:px-6">
       <SidebarTrigger />
+      <Link to="/" className="flex items-center gap-2 shrink-0">
+        <img src={logoImg} alt="Petiscos das Gerais" className="h-8 w-8 object-contain" />
+      </Link>
       <div className="flex-1 flex items-center gap-4">
         <h1 className="text-lg font-semibold hidden md:block text-foreground">{currentTitle}</h1>
       </div>

@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { useState, useMemo } from 'react'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { AuthProvider } from '@/hooks/use-auth'
 import Index from './pages/Index'
 import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
@@ -13,40 +13,10 @@ import Calculator from './pages/Calculator'
 import Recipes from './pages/Recipes'
 import RecipeDetail from './pages/RecipeDetail'
 import Reports from './pages/Reports'
-import { AuthContext } from './hooks/use-auth'
-import {
-  getStoredUser,
-  loginWithPassword,
-  signUp,
-  clearSession,
-  type SkipCloudUser,
-} from '@/lib/skip-cloud'
 
 const App = () => {
-  const [user, setUser] = useState<SkipCloudUser | null>(() => getStoredUser())
-
-  const authValue = useMemo(
-    () => ({
-      isAuthenticated: !!user,
-      user,
-      login: async (email: string, password: string) => {
-        const u = await loginWithPassword(email, password)
-        setUser(u)
-      },
-      signup: async (email: string, password: string, name?: string) => {
-        const u = await signUp(email, password, name)
-        setUser(u)
-      },
-      logout: () => {
-        clearSession()
-        setUser(null)
-      },
-    }),
-    [user],
-  )
-
   return (
-    <AuthContext.Provider value={authValue}>
+    <AuthProvider>
       <BrowserRouter>
         <TooltipProvider>
           <Toaster />
@@ -66,7 +36,7 @@ const App = () => {
           </Routes>
         </TooltipProvider>
       </BrowserRouter>
-    </AuthContext.Provider>
+    </AuthProvider>
   )
 }
 

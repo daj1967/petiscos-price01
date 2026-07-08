@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/use-auth'
-import { savePricingRecord } from '@/lib/skip-cloud'
+import { createCalculation } from '@/services/calculations'
+import { extractFieldErrors, getErrorMessage } from '@/lib/pocketbase/errors'
 import { formatCurrency } from '@/lib/utils'
 import { CalculatorForm } from '@/components/calculator-form'
 import { CalculatorSummary } from '@/components/calculator-summary'
@@ -55,24 +56,25 @@ export default function Calculator() {
     }
     setIsSaving(true)
     try {
-      await savePricingRecord({
-        user: user.id,
-        productName: form.name,
-        baseCost: result.totalCost,
-        marginPct: form.profitPct,
-        retailPrice: result.priceWithIcmsSt,
-        taxPct: form.simplesNacionalPct + form.icmsStPct,
-        notes: form.sku,
+      await createCalculation({
+        product_name: form.name,
+        total_cost: result.totalCost,
+        markup: form.profitPct,
+        final_price: result.priceWithIcmsSt,
+        ingredients_list: { ...form },
+        user_id: user.id,
       })
       toast({
         title: 'Preço Salvo!',
         description: `${form.name}: ${formatCurrency(result.priceWithIcmsSt)} (c/ ICMS-ST)`,
       })
     } catch (err) {
+      const errors = extractFieldErrors(err)
       toast({
         variant: 'destructive',
         title: 'Erro ao salvar',
-        description: err instanceof Error ? err.message : 'Tente novamente.',
+        description:
+          Object.keys(errors).length > 0 ? Object.values(errors).join(' ') : getErrorMessage(err),
       })
     }
     setIsSaving(false)

@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import logoImg from '../assets/petiscosdasgeraisfrota-30-x-30-cm-1-copia-2-061c7.png'
 
 export default function SignUp() {
-  const { isAuthenticated, signup } = useAuth()
+  const { isAuthenticated, loading, signup } = useAuth()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -18,6 +18,14 @@ export default function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />

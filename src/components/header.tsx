@@ -1,7 +1,8 @@
-import { Bell, Search, LogOut, User } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { LogOut } from 'lucide-react'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,69 +11,48 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/hooks/use-auth'
-import { useLocation, Link } from 'react-router-dom'
-import logoImg from '../assets/petiscosdasgeraisfrota-30-x-30-cm-1-copia-2-061c7.png'
 
 export function Header() {
-  const { logout } = useAuth()
-  const location = useLocation()
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
 
-  const pageTitle: Record<string, string> = {
-    '/': 'Dashboard',
-    '/products': 'Gestão de Produtos',
-    '/calculator': 'Calculadora de Preços',
-    '/reports': 'Relatórios',
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
   }
 
-  const currentTitle = pageTitle[location.pathname] || 'Visão Geral'
+  const initials = user?.email ? user.email.substring(0, 2).toUpperCase() : 'U'
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 shadow-sm md:px-6">
+    <header className="flex items-center justify-between gap-4 border-b px-4 py-3 md:px-6 bg-background sticky top-0 z-30">
       <SidebarTrigger />
-      <Link to="/" className="flex items-center gap-2 shrink-0">
-        <img src={logoImg} alt="Petiscos das Gerais" className="h-8 w-8 object-contain" />
-      </Link>
-      <div className="flex-1 flex items-center gap-4">
-        <h1 className="text-lg font-semibold hidden md:block text-foreground">{currentTitle}</h1>
-      </div>
-      <div className="flex items-center gap-4">
-        <form className="relative hidden lg:flex items-center">
-          <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar produtos..."
-            className="w-64 rounded-full bg-muted/50 pl-8 focus-visible:bg-background"
-          />
-        </form>
-        <Button variant="ghost" size="icon" className="relative rounded-full">
-          <Bell className="h-5 w-5" />
-          <span className="absolute top-1 right-1 flex h-2 w-2 rounded-full bg-accent"></span>
-        </Button>
+      <div className="flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button variant="ghost" className="flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src="https://img.usecurling.com/ppl/thumbnail?gender=female&seed=1"
-                  alt="Usuário"
-                />
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
               </Avatar>
+              <span className="hidden sm:inline text-sm font-medium">
+                {user?.name || user?.email}
+              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{user?.name || 'Usuário'}</p>
+                <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+              </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <User className="mr-2 h-4 w-4" />
-              <span>Perfil</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className="text-destructive">
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive cursor-pointer"
+              onClick={handleLogout}
+            >
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Sair</span>
+              Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Search, FileText, Loader2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,35 +14,44 @@ import {
 } from '@/components/ui/table'
 import { formatCurrency } from '@/lib/utils'
 import { useAuth } from '@/hooks/use-auth'
-import { fetchPricingRecords } from '@/lib/skip-cloud'
-import type { PricingRecord } from '@/lib/pricing-types'
+import { useRealtime } from '@/hooks/use-realtime'
+import { getCalculations, type CalculationRecord } from '@/services/calculations'
+import { getErrorMessage } from '@/lib/pocketbase/errors'
 
 export default function Reports() {
   const { user } = useAuth()
-  const [records, setRecords] = useState<PricingRecord[]>([])
+  const [records, setRecords] = useState<CalculationRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     if (!user) return
-    setLoading(true)
-    fetchPricingRecords(user.id)
-      .then((data) => {
-        setRecords(data)
-        setError(null)
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Erro ao carregar relatórios')
-      })
-      .finally(() => setLoading(false))
+    try {
+      const data = await getCalculations(user.id)
+      setRecords(data)
+      setError(null)
+    } catch (err) {
+      const msg = getErrorMessage(err)
+      setError(msg.includes('Failed') ? 'Não foi possível conectar ao servidor.' : msg)
+    } finally {
+      setLoading(false)
+    }
   }, [user])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  useRealtime('calculations', () => {
+    loadData()
+  })
 
   const filtered = useMemo(() => {
     return records.filter((r) => {
-      const matchesSearch = r.productName.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesSearch = r.product_name.toLowerCase().includes(searchTerm.toLowerCase())
       const d = new Date(r.created)
       const matchesStart = !startDate || d >= new Date(startDate)
       const matchesEnd = !endDate || d <= new Date(endDate + 'T23:59:59')
@@ -51,16 +60,20 @@ export default function Reports() {
   }, [records, searchTerm, startDate, endDate])
 
   const totalProfit = useMemo(
-    () => filtered.reduce((s, r) => s + (r.retailPrice - r.baseCost), 0),
+    () => filtered.reduce((s, r) => s + (r.final_price - r.total_cost), 0),
     [filtered],
   )
   const avgMargin = useMemo(
-    () => (filtered.length ? filtered.reduce((s, r) => s + r.marginPct, 0) / filtered.length : 0),
+    () => (filtered.length ? filtered.reduce((s, r) => s + r.markup, 0) / filtered.length : 0),
     [filtered],
   )
 
   const fmtDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    new Date(iso).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -146,29 +159,28 @@ export default function Reports() {
                 <TableRow>
                   <TableHead>Data</TableHead>
                   <TableHead>Produto</TableHead>
-                  <TableHead className="text-right">Custo Base</TableHead>
+                  <TableHead className="text-right">Custo Total</TableHead>
                   <TableHead className="text-right">Margem</TableHead>
-                  <TableHead className="text-right">Impostos</TableHead>
-                  <TableHead className="text-right">Preço Varejo</TableHead>
+                  <TableHead className="text-right">Preço Final</TableHead>
                   <TableHead className="text-right">Lucro</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center">
+                    <TableCell colSpan={6} className="h-32 text-center">
                       <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                     </TableCell>
                   </TableRow>
                 ) : error ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-destructive">
+                    <TableCell colSpan={6} className="h-32 text-center text-destructive">
                       {error}
                     </TableCell>
                   </TableRow>
                 ) : filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                       <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       Nenhum registro encontrado.
                     </TableCell>
@@ -179,17 +191,14 @@ export default function Reports() {
                       <TableCell className="text-sm text-muted-foreground">
                         {fmtDate(r.created)}
                       </TableCell>
-                      <TableCell className="font-medium">{r.productName}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(r.baseCost)}</TableCell>
-                      <TableCell className="text-right">
-                        {(r.marginPct * 100).toFixed(1)}%
-                      </TableCell>
-                      <TableCell className="text-right">{(r.taxPct * 100).toFixed(1)}%</TableCell>
+                      <TableCell className="font-medium">{r.product_name}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(r.total_cost)}</TableCell>
+                      <TableCell className="text-right">{(r.markup * 100).toFixed(1)}%</TableCell>
                       <TableCell className="text-right font-medium">
-                        {formatCurrency(r.retailPrice)}
+                        {formatCurrency(r.final_price)}
                       </TableCell>
                       <TableCell className="text-right font-bold text-emerald-600">
-                        {formatCurrency(r.retailPrice - r.baseCost)}
+                        {formatCurrency(r.final_price - r.total_cost)}
                       </TableCell>
                     </TableRow>
                   ))

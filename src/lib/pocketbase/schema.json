@@ -1,0 +1,166 @@
+{
+  "generatedAt": "2026-07-08T22:35:34.708Z",
+  "collections": [
+    {
+      "name": "users",
+      "type": "auth",
+      "apiRules": {
+        "list": "id = @request.auth.id",
+        "view": "id = @request.auth.id",
+        "create": "",
+        "update": "id = @request.auth.id",
+        "delete": "id = @request.auth.id"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "avatar",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
+        "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
+      ]
+    },
+    {
+      "name": "ingredients",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && user_id = @request.auth.id",
+        "view": "@request.auth.id != '' && user_id = @request.auth.id",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && user_id = @request.auth.id",
+        "delete": "@request.auth.id != '' && user_id = @request.auth.id"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "unit",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cost",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_ingredients_user_id ON ingredients (user_id)"]
+    },
+    {
+      "name": "calculations",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != '' && user_id = @request.auth.id",
+        "view": "@request.auth.id != '' && user_id = @request.auth.id",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != '' && user_id = @request.auth.id",
+        "delete": "@request.auth.id != '' && user_id = @request.auth.id"
+      },
+      "fields": [
+        {
+          "name": "product_name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "total_cost",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "markup",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "final_price",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "ingredients_list",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_calculations_user_id ON calculations (user_id)"]
+    }
+  ]
+}

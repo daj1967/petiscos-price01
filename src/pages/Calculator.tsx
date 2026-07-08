@@ -11,6 +11,8 @@ import {
   SelectItem,
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/hooks/use-auth'
+import { savePricingRecord } from '@/lib/skip-cloud'
 import { formatCurrency } from '@/lib/utils'
 import { CalculatorForm } from '@/components/calculator-form'
 import { CalculatorSummary } from '@/components/calculator-summary'
@@ -20,7 +22,9 @@ import type { ProductPricing } from '@/lib/pricing-types'
 
 export default function Calculator() {
   const { toast } = useToast()
+  const { user } = useAuth()
   const [form, setForm] = useState<ProductPricing>(defaultProduct)
+  const [isSaving, setIsSaving] = useState(false)
   const result = useMemo(() => calculateAll(form), [form])
 
   const update = (field: keyof ProductPricing, value: string | number | boolean) => {
@@ -32,7 +36,7 @@ export default function Calculator() {
     if (product) setForm({ ...product })
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name) {
       toast({
         variant: 'destructive',
@@ -41,10 +45,37 @@ export default function Calculator() {
       })
       return
     }
-    toast({
-      title: 'Preço Salvo!',
-      description: `${form.name}: ${formatCurrency(result.priceWithIcmsSt)} (c/ ICMS-ST)`,
-    })
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Não autenticado',
+        description: 'Faça login para salvar dados de precificação.',
+      })
+      return
+    }
+    setIsSaving(true)
+    try {
+      await savePricingRecord({
+        user: user.id,
+        productName: form.name,
+        baseCost: result.totalCost,
+        marginPct: form.profitPct,
+        retailPrice: result.priceWithIcmsSt,
+        taxPct: form.simplesNacionalPct + form.icmsStPct,
+        notes: form.sku,
+      })
+      toast({
+        title: 'Preço Salvo!',
+        description: `${form.name}: ${formatCurrency(result.priceWithIcmsSt)} (c/ ICMS-ST)`,
+      })
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao salvar',
+        description: err instanceof Error ? err.message : 'Tente novamente.',
+      })
+    }
+    setIsSaving(false)
   }
 
   return (
@@ -88,7 +119,7 @@ export default function Calculator() {
           <CalculatorForm form={form} update={update} />
         </div>
         <div className="md:col-span-4">
-          <CalculatorSummary result={result} form={form} onSave={handleSave} />
+          <CalculatorSummary result={result} form={form} onSave={handleSave} isSaving={isSaving} />
         </div>
       </div>
 

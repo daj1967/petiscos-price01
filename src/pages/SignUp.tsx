@@ -9,32 +9,50 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import logoImg from '../assets/petiscosdasgeraisfrota-30-x-30-cm-1-copia-2-061c7.png'
 
-export default function Login() {
-  const { isAuthenticated, login } = useAuth()
+export default function SignUp() {
+  const { isAuthenticated, signup } = useAuth()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />
   }
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (password !== confirmPassword) {
+      toast({
+        variant: 'destructive',
+        title: 'Senhas diferentes',
+        description: 'A confirmação de senha não confere.',
+      })
+      return
+    }
+    if (password.length < 8) {
+      toast({
+        variant: 'destructive',
+        title: 'Senha muito curta',
+        description: 'A senha deve ter no mínimo 8 caracteres.',
+      })
+      return
+    }
     setIsLoading(true)
     try {
-      await login(email, password)
+      await signup(email, password, name)
       toast({
-        title: 'Login bem-sucedido',
-        description: 'Bem-vindo de volta ao sistema!',
+        title: 'Conta criada com sucesso!',
+        description: 'Bem-vindo ao sistema de precificação!',
       })
     } catch (err) {
       toast({
         variant: 'destructive',
-        title: 'Erro ao entrar',
-        description: err instanceof Error ? err.message : 'Credenciais inválidas.',
+        title: 'Erro ao criar conta',
+        description: err instanceof Error ? err.message : 'Tente novamente.',
       })
     }
     setIsLoading(false)
@@ -50,12 +68,9 @@ export default function Login() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-secondary via-secondary/80 to-transparent z-10" />
         <div className="z-20 flex flex-col justify-end p-12 text-white h-full max-w-2xl">
-          <h1 className="text-4xl font-bold mb-4 leading-tight">
-            Ajudando indústrias de alimentos a crescer.
-          </h1>
+          <h1 className="text-4xl font-bold mb-4 leading-tight">Junte-se a nós.</h1>
           <p className="text-lg text-white/90">
-            Precificação inteligente para o varejo, controlando margens, custos e impostos com
-            precisão de centavos.
+            Crie sua conta e comece a precificar produtos com precisão.
           </p>
         </div>
       </div>
@@ -73,11 +88,21 @@ export default function Login() {
 
           <Card className="border-0 shadow-none lg:border lg:shadow-sm">
             <CardHeader className="space-y-1 px-0 lg:px-6">
-              <CardTitle className="text-2xl font-bold">Bem-vindo de volta</CardTitle>
-              <CardDescription>Entre com suas credenciais para acessar o painel.</CardDescription>
+              <CardTitle className="text-2xl font-bold">Criar Conta</CardTitle>
+              <CardDescription>Preencha seus dados para se cadastrar.</CardDescription>
             </CardHeader>
             <CardContent className="px-0 lg:px-6">
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Nome (opcional)</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Seu nome"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -90,16 +115,12 @@ export default function Login() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password">Senha</Label>
-                    <a href="#" className="text-sm font-medium text-primary hover:underline">
-                      Esqueceu a senha?
-                    </a>
-                  </div>
+                  <Label htmlFor="password">Senha</Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
+                      placeholder="Mínimo 8 caracteres"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
@@ -115,20 +136,30 @@ export default function Login() {
                     </Button>
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+                  <Input
+                    id="confirmPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Entrando...
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Criando conta...
                     </>
                   ) : (
-                    'Entrar'
+                    'Criar Conta'
                   )}
                 </Button>
               </form>
               <div className="mt-4 text-center text-sm text-muted-foreground">
-                Não tem conta?{' '}
-                <Link to="/signup" className="font-medium text-primary hover:underline">
-                  Criar conta
+                Já tem conta?{' '}
+                <Link to="/login" className="font-medium text-primary hover:underline">
+                  Entrar
                 </Link>
               </div>
             </CardContent>

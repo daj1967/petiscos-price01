@@ -72,6 +72,9 @@ export default function Index() {
           <Button variant="outline" asChild>
             <Link to="/products">Ver Produtos</Link>
           </Button>
+          <Button variant="outline" asChild>
+            <Link to="/reports">Relatórios</Link>
+          </Button>
           <Button asChild>
             <Link to="/calculator">Nova Precificação</Link>
           </Button>

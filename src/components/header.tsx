@@ -23,6 +23,7 @@ export function Header() {
     '/': 'Dashboard',
     '/products': 'Gestão de Produtos',
     '/calculator': 'Calculadora de Preços',
+    '/reports': 'Relatórios',
   }
 
   const currentTitle = pageTitle[location.pathname] || 'Visão Geral'

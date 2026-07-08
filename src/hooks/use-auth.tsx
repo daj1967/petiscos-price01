@@ -1,8 +1,11 @@
-import { createContext, useContext, ReactNode, useState, useMemo } from 'react'
+import { createContext, useContext } from 'react'
+import type { SkipCloudUser } from '@/lib/skip-cloud'
 
 interface AuthContextType {
   isAuthenticated: boolean
-  login: () => void
+  user: SkipCloudUser | null
+  login: (email: string, password: string) => Promise<void>
+  signup: (email: string, password: string, name?: string) => Promise<void>
   logout: () => void
 }
 

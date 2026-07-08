@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Package, Calculator, Store, Settings } from 'lucide-react'
+import { Home, Package, Calculator, Store, Settings, FileText } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +20,7 @@ const navItems = [
   { name: 'Produtos', href: '/products', icon: Package },
   { name: 'Calculadora', href: '/calculator', icon: Calculator },
   { name: 'Fichas Técnicas', href: '/recipes', icon: Store },
+  { name: 'Relatórios', href: '/reports', icon: FileText },
   { name: 'Configurações', href: '#', icon: Settings },
 ]
 

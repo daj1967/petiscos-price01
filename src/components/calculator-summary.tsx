@@ -1,4 +1,4 @@
-import { Calculator as CalcIcon, Save, Download } from 'lucide-react'
+import { Calculator as CalcIcon, Save, Download, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -9,6 +9,7 @@ interface Props {
   result: PricingResult
   form: ProductPricing
   onSave: () => void
+  isSaving?: boolean
 }
 
 function Row({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
@@ -33,7 +34,7 @@ function VerbaRow({ label, value, pct }: { label: string; value: number; pct: nu
   )
 }
 
-export function CalculatorSummary({ result, form, onSave }: Props) {
+export function CalculatorSummary({ result, form, onSave, isSaving }: Props) {
   const isValid = result.priceWithIcmsSt > 0
   return (
     <Card className="sticky top-24 border-primary/20 shadow-elevation overflow-hidden">
@@ -83,8 +84,16 @@ export function CalculatorSummary({ result, form, onSave }: Props) {
         <Button variant="outline" className="w-full" onClick={() => {}}>
           <Download className="mr-2 h-4 w-4" /> PDF
         </Button>
-        <Button className="w-full" onClick={onSave} disabled={!isValid}>
-          <Save className="mr-2 h-4 w-4" /> Salvar
+        <Button className="w-full" onClick={onSave} disabled={!isValid || isSaving}>
+          {isSaving ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...
+            </>
+          ) : (
+            <>
+              <Save className="mr-2 h-4 w-4" /> Salvar
+            </>
+          )}
         </Button>
       </CardFooter>
     </Card>

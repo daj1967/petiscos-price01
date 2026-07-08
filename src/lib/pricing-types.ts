@@ -68,3 +68,16 @@ export interface PricingResult {
   icmsStVerba: number
   profitVerba: number
 }
+
+export interface PricingRecord {
+  id: string
+  user: string
+  productName: string
+  baseCost: number
+  marginPct: number
+  retailPrice: number
+  taxPct: number
+  notes: string
+  created: string
+  updated: string
+}

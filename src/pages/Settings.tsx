@@ -26,8 +26,8 @@ export default function Settings() {
             <Package className="h-4 w-4" /> Ingredientes
           </TabsTrigger>
           <TabsTrigger value="calculations" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" /> Fichas Técnicas
-          </TabsTrigger>
+            <FileText className="h-4 w-4" /> Produtos &amp; Fichas
+          </TabsTrigger>{' '}
         </TabsList>
         {isAdmin && (
           <TabsContent value="users">

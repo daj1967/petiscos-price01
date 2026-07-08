@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Pencil, Trash2, Loader2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, Loader2, Search, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -19,6 +20,7 @@ import { getCalculations, deleteCalculation, type CalculationRecord } from '@/se
 import { getErrorMessage } from '@/lib/pocketbase/errors'
 import { formatCurrency } from '@/lib/utils'
 import { ConfirmDeleteDialog } from './confirm-delete-dialog'
+import { TechnicalSheetDialog } from './technical-sheet-dialog'
 
 export function CalculationsManager() {
   const { toast } = useToast()
@@ -27,6 +29,8 @@ export function CalculationsManager() {
   const [records, setRecords] = useState<CalculationRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [viewRecord, setViewRecord] = useState<CalculationRecord | null>(null)
+  const [search, setSearch] = useState('')
 
   const loadData = useCallback(async () => {
     if (!user) return
@@ -47,11 +51,16 @@ export function CalculationsManager() {
     loadData()
   })
 
+  const filtered = useMemo(() => {
+    if (!search.trim()) return records
+    return records.filter((r) => r.product_name.toLowerCase().includes(search.toLowerCase().trim()))
+  }, [records, search])
+
   const handleDelete = async () => {
     if (!deleteId) return
     try {
       await deleteCalculation(deleteId)
-      toast({ title: 'Ficha técnica excluída!' })
+      toast({ title: 'Produto excluído!' })
       setDeleteId(null)
       loadData()
     } catch (err) {
@@ -60,11 +69,7 @@ export function CalculationsManager() {
   }
 
   const fmtDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
+    new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
   if (loading) {
     return (
@@ -77,64 +82,105 @@ export function CalculationsManager() {
   return (
     <Card>
       <CardContent className="p-0">
-        <div className="flex items-center justify-between p-4 border-b">
-          <Badge variant="secondary">{records.length} fichas técnicas</Badge>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 border-b">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Badge variant="secondary">{records.length} produtos</Badge>
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar produto..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8 h-9"
+              />
+            </div>
+          </div>
+          <Button onClick={() => navigate('/calculator')}>
+            <Plus className="mr-2 h-4 w-4" /> Novo Produto
+          </Button>
         </div>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Produto</TableHead>
-                <TableHead className="text-right">Custo Total</TableHead>
-                <TableHead className="text-right">Margem</TableHead>
-                <TableHead className="text-right">Preço Final</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {records.map((r) => (
-                <TableRow key={r.id} className="hover:bg-muted/50">
-                  <TableCell className="text-sm text-muted-foreground">
-                    {fmtDate(r.created)}
-                  </TableCell>
-                  <TableCell className="font-medium">{r.product_name}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(r.total_cost)}</TableCell>
-                  <TableCell className="text-right">{(r.markup * 100).toFixed(1)}%</TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatCurrency(r.final_price)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => navigate(`/calculator?edit=${r.id}`)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive"
-                      onClick={() => setDeleteId(r.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <Package className="h-10 w-10 text-muted-foreground/50 mb-3" />
+            <p className="text-muted-foreground">
+              {search ? 'Nenhum produto encontrado.' : 'Nenhum produto cadastrado.'}
+            </p>
+            {!search && (
+              <Button variant="outline" className="mt-3" onClick={() => navigate('/calculator')}>
+                <Plus className="mr-2 h-4 w-4" /> Criar primeiro produto
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Produto</TableHead>
+                  <TableHead className="text-right">Custo Total</TableHead>
+                  <TableHead className="text-right">Margem</TableHead>
+                  <TableHead className="text-right">Preço Final</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((r) => (
+                  <TableRow key={r.id} className="hover:bg-muted/50">
+                    <TableCell className="text-sm text-muted-foreground">
+                      {fmtDate(r.created)}
+                    </TableCell>
+                    <TableCell className="font-medium">{r.product_name}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(r.total_cost)}</TableCell>
+                    <TableCell className="text-right">{(r.markup * 100).toFixed(1)}%</TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatCurrency(r.final_price)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setViewRecord(r)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => navigate(`/calculator?edit=${r.id}`)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive"
+                        onClick={() => setDeleteId(r.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </CardContent>
 
       <ConfirmDeleteDialog
         open={!!deleteId}
         onOpenChange={(v) => !v && setDeleteId(null)}
         onConfirm={handleDelete}
-        title="Excluir Ficha Técnica"
-        description="Tem certeza? Esta ação não pode ser desfeita."
+        title="Excluir Produto"
+        description="Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita."
+      />
+      <TechnicalSheetDialog
+        record={viewRecord}
+        open={!!viewRecord}
+        onOpenChange={(v) => !v && setViewRecord(null)}
       />
     </Card>
   )

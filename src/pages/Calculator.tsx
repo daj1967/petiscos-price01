@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { Plus } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,7 @@ export default function Calculator() {
   const [isSaving, setIsSaving] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const result = useMemo(() => calculateAll(form), [form])
 
   useEffect(() => {
@@ -57,6 +59,12 @@ export default function Calculator() {
   const loadProduct = (productId: string) => {
     const product = mockProducts.find((p) => p.id === productId)
     if (product) setForm({ ...product })
+  }
+
+  const handleNew = () => {
+    setForm({ ...defaultProduct })
+    setEditingId(null)
+    navigate('/calculator')
   }
 
   const handleSave = async () => {
@@ -93,7 +101,8 @@ export default function Calculator() {
           description: `${form.name}: ${formatCurrency(result.priceWithIcmsSt)} (c/ ICMS-ST)`,
         })
       } else {
-        await createCalculation(payload)
+        const created = await createCalculation(payload)
+        setEditingId(created.id)
         toast({
           title: 'Preço Salvo!',
           description: `${form.name}: ${formatCurrency(result.priceWithIcmsSt)} (c/ ICMS-ST)`,
@@ -120,6 +129,11 @@ export default function Calculator() {
           </h2>
           <p className="text-muted-foreground">Simule custos, margens e tributos para o varejo.</p>
         </div>
+        {editingId && (
+          <Button variant="outline" onClick={handleNew}>
+            <Plus className="mr-2 h-4 w-4" /> Novo Produto
+          </Button>
+        )}
       </div>
 
       <Card>

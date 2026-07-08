@@ -95,8 +95,8 @@ export function CalculationsManager() {
               />
             </div>
           </div>
-          <Button onClick={() => navigate('/calculator')}>
-            <Plus className="mr-2 h-4 w-4" /> Novo Produto
+          <Button onClick={() => navigate('/recipe/new')}>
+            <Plus className="mr-2 h-4 w-4" /> Nova Ficha Técnica
           </Button>
         </div>
         {filtered.length === 0 ? (
@@ -106,8 +106,8 @@ export function CalculationsManager() {
               {search ? 'Nenhum produto encontrado.' : 'Nenhum produto cadastrado.'}
             </p>
             {!search && (
-              <Button variant="outline" className="mt-3" onClick={() => navigate('/calculator')}>
-                <Plus className="mr-2 h-4 w-4" /> Criar primeiro produto
+              <Button variant="outline" className="mt-3" onClick={() => navigate('/recipe/new')}>
+                <Plus className="mr-2 h-4 w-4" /> Criar primeira ficha técnica
               </Button>
             )}
           </div>
@@ -132,7 +132,7 @@ export function CalculationsManager() {
                     </TableCell>
                     <TableCell className="font-medium">{r.product_name}</TableCell>
                     <TableCell className="text-right">{formatCurrency(r.total_cost)}</TableCell>
-                    <TableCell className="text-right">{(r.markup * 100).toFixed(1)}%</TableCell>
+                    <TableCell className="text-right">{r.markup.toFixed(1)}%</TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(r.final_price)}
                     </TableCell>
@@ -149,7 +149,7 @@ export function CalculationsManager() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => navigate(`/calculator?edit=${r.id}`)}
+                        onClick={() => navigate(`/recipe/${r.id}`)}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>

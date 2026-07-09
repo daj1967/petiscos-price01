@@ -1,4 +1,9 @@
-import type { ProductPricing, PricingResult } from './pricing-types'
+import type {
+  ProductPricing,
+  PricingResult,
+  PricingSimulation,
+  PricingSimulationResult,
+} from './pricing-types'
 
 export function calculateProductionCost(p: ProductPricing): number {
   const packaging =
@@ -45,6 +50,61 @@ export function calculateUnitPrice(priceWithIcmsSt: number, unitsPerPack: number
 
 export function calculateSuggestedPrice(unitPrice: number): number {
   return unitPrice / 0.65
+}
+
+export function calculateEffectiveIvaRate(ivaRate: number, reductionPct: number): number {
+  return ivaRate * (1 - reductionPct)
+}
+
+export function calculateMarkupPrice(
+  variableCost: number,
+  fixedCostPct: number,
+  taxPct: number,
+  commissionPct: number,
+  profitPct: number,
+  otherPct: number,
+): number {
+  const sumPct = fixedCostPct + taxPct + commissionPct + profitPct + otherPct
+  const denom = 1 - sumPct
+  if (denom <= 0 || variableCost === 0) return 0
+  return variableCost / denom
+}
+
+export function calculatePriceWithIvaPorFora(netPrice: number, effectiveIvaRate: number): number {
+  return netPrice * (1 + effectiveIvaRate)
+}
+
+export function calculateBaseProductCost(
+  ingredientCosts: number[],
+  yieldWeight: number,
+  lossPercentage: number,
+): { totalCost: number; costPerKg: number; effectiveYield: number } {
+  const totalCost = ingredientCosts.reduce((sum, c) => sum + c, 0)
+  const effectiveYield = yieldWeight * (1 - lossPercentage / 100)
+  const costPerKg = effectiveYield > 0 ? totalCost / effectiveYield : 0
+  return { totalCost, costPerKg, effectiveYield }
+}
+
+export function calculateSimulation(s: PricingSimulation): PricingSimulationResult {
+  const effectiveIvaRate = calculateEffectiveIvaRate(s.ivaRate / 100, s.reductionPct / 100)
+  const priceWithoutIva = calculateMarkupPrice(
+    s.variableCost,
+    s.fixedCostPct / 100,
+    s.taxPct / 100,
+    s.commissionPct / 100,
+    s.profitPct / 100,
+    s.otherPct / 100,
+  )
+  const priceWithIva = calculatePriceWithIvaPorFora(priceWithoutIva, effectiveIvaRate)
+  return {
+    effectiveIvaRate,
+    priceWithoutIva,
+    priceWithIva,
+    profitAmount: priceWithoutIva * (s.profitPct / 100),
+    taxAmount: priceWithoutIva * (s.taxPct / 100),
+    commissionAmount: priceWithoutIva * (s.commissionPct / 100),
+    totalPercentages: s.fixedCostPct + s.taxPct + s.commissionPct + s.profitPct + s.otherPct,
+  }
 }
 
 export function calculateAll(p: ProductPricing): PricingResult {

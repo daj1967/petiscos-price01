@@ -81,3 +81,24 @@ export interface PricingRecord {
   created: string
   updated: string
 }
+
+export interface PricingSimulation {
+  variableCost: number
+  fixedCostPct: number
+  taxPct: number
+  commissionPct: number
+  profitPct: number
+  otherPct: number
+  ivaRate: number
+  reductionPct: number
+}
+
+export interface PricingSimulationResult {
+  effectiveIvaRate: number
+  priceWithoutIva: number
+  priceWithIva: number
+  profitAmount: number
+  taxAmount: number
+  commissionAmount: number
+  totalPercentages: number
+}

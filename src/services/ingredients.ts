@@ -1,37 +1,19 @@
 import pb from '@/lib/pocketbase/client'
+import type { Ingredient } from '@/types/system'
 
-export interface IngredientRecord {
-  id: string
-  name: string
-  unit: string
-  cost: number
-  user_id: string
-  created: string
-  updated: string
-}
-
-export interface CreateIngredientData {
-  name: string
-  unit: string
-  cost: number
-  user_id: string
-}
-
-export function getIngredients(userId: string) {
-  return pb.collection('ingredients').getFullList<IngredientRecord>({
-    filter: `user_id = "${userId}"`,
+export const getIngredients = () =>
+  pb.collection('ingredients').getFullList({
     sort: '-created',
-  })
-}
+    expand: 'supplier_id',
+  }) as Promise<Ingredient[]>
 
-export function createIngredient(data: CreateIngredientData) {
-  return pb.collection('ingredients').create<IngredientRecord>(data)
-}
+export const getIngredient = (id: string) =>
+  pb.collection('ingredients').getOne(id, { expand: 'supplier_id' }) as Promise<Ingredient>
 
-export function updateIngredient(id: string, data: Partial<CreateIngredientData>) {
-  return pb.collection('ingredients').update<IngredientRecord>(id, data)
-}
+export const createIngredient = (data: Partial<Ingredient>) =>
+  pb.collection('ingredients').create(data)
 
-export function deleteIngredient(id: string) {
-  return pb.collection('ingredients').delete(id)
-}
+export const updateIngredient = (id: string, data: Partial<Ingredient>) =>
+  pb.collection('ingredients').update(id, data)
+
+export const deleteIngredient = (id: string) => pb.collection('ingredients').delete(id)

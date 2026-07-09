@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { Navigate, Link, useLocation } from 'react-router-dom'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { useToast } from '@/hooks/use-toast'
@@ -12,6 +12,8 @@ import logoImg from '../assets/petiscosdasgeraisfrota-30-x-30-cm-1-copia-2-061c7
 export default function Login() {
   const { isAuthenticated, loading, login } = useAuth()
   const { toast } = useToast()
+  const location = useLocation()
+  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/'
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
@@ -26,7 +28,7 @@ export default function Login() {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />
+    return <Navigate to={from} replace />
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -38,11 +40,11 @@ export default function Login() {
         title: 'Login bem-sucedido',
         description: 'Bem-vindo de volta ao sistema!',
       })
-    } catch (err) {
+    } catch {
       toast({
         variant: 'destructive',
         title: 'Erro ao entrar',
-        description: err instanceof Error ? err.message : 'Credenciais inválidas.',
+        description: 'Dados de acesso incorretos ou erro de autenticação.',
       })
     }
     setIsLoading(false)
@@ -100,9 +102,12 @@ export default function Login() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Senha</Label>
-                    <a href="#" className="text-sm font-medium text-primary hover:underline">
+                    <Link
+                      to="/forgot-password"
+                      className="text-sm font-medium text-primary hover:underline"
+                    >
                       Esqueceu a senha?
-                    </a>
+                    </Link>
                   </div>
                   <div className="relative">
                     <Input

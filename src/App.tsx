@@ -8,6 +8,7 @@ import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
+import ForgotPassword from './pages/ForgotPassword'
 import Products from './pages/Products'
 import Calculator from './pages/Calculator'
 import Recipes from './pages/Recipes'
@@ -25,6 +26,7 @@ const App = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/products" element={<Products />} />

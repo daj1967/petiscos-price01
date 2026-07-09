@@ -1,4 +1,4 @@
-import { Outlet, Navigate } from 'react-router-dom'
+import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import { AppSidebar } from './app-sidebar'
@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/use-auth'
 
 export default function Layout() {
   const { isAuthenticated, loading } = useAuth()
+  const location = useLocation()
 
   if (loading) {
     return (
@@ -17,7 +18,7 @@ export default function Layout() {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" replace state={{ from: location }} />
   }
 
   return (

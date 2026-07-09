@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Trash2, Loader2, Search, Package } from 'lucide-react'
+import { Plus, Pencil, Trash2, Loader2, Search, PackageCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -17,6 +17,7 @@ import { useRealtime } from '@/hooks/use-realtime'
 import { getFinalProducts, deleteFinalProduct } from '@/services/final-products'
 import { getErrorMessage } from '@/lib/pocketbase/errors'
 import { ConfirmDeleteDialog } from '@/components/settings/confirm-delete-dialog'
+import { FinalProductEditor } from '@/components/final-products/final-product-editor'
 import type { FinalProduct } from '@/types/system'
 
 export default function FinalProducts() {
@@ -24,6 +25,8 @@ export default function FinalProducts() {
   const [items, setItems] = useState<FinalProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editing, setEditing] = useState<FinalProduct | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const loadData = useCallback(async () => {
@@ -71,7 +74,9 @@ export default function FinalProducts() {
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-800">Produtos Finais</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
+          <PackageCheck className="h-6 w-6 text-primary" /> Produtos Finais
+        </h2>
         <p className="text-muted-foreground">Catálogo de produtos acabados para venda.</p>
       </div>
       <Card>
@@ -89,10 +94,18 @@ export default function FinalProducts() {
                 />
               </div>
             </div>
+            <Button
+              onClick={() => {
+                setEditing(null)
+                setDialogOpen(true)
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> Novo Produto
+            </Button>
           </div>
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Package className="h-10 w-10 text-muted-foreground/50 mb-3" />
+              <PackageCheck className="h-10 w-10 text-muted-foreground/50 mb-3" />
               <p className="text-muted-foreground">
                 {search ? 'Nenhum produto encontrado.' : 'Nenhum produto final cadastrado.'}
               </p>
@@ -126,6 +139,17 @@ export default function FinalProducts() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          className="h-8 w-8"
+                          onClick={() => {
+                            setEditing(fp)
+                            setDialogOpen(true)
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           className="h-8 w-8 text-destructive"
                           onClick={() => setDeleteId(fp.id)}
                         >
@@ -140,12 +164,18 @@ export default function FinalProducts() {
           )}
         </CardContent>
       </Card>
+      <FinalProductEditor
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        editing={editing}
+        onSaved={loadData}
+      />
       <ConfirmDeleteDialog
         open={!!deleteId}
         onOpenChange={(v) => !v && setDeleteId(null)}
         onConfirm={handleDelete}
         title="Excluir Produto Final"
-        description="Tem certeza? Esta ação não pode ser desfeita."
+        description="Tem certeza?"
       />
     </div>
   )

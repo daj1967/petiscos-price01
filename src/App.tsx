@@ -9,7 +9,12 @@ import Layout from './components/Layout'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
 import ForgotPassword from './pages/ForgotPassword'
-import Products from './pages/Products'
+import Ingredients from './pages/Ingredients'
+import BaseProducts from './pages/BaseProducts'
+import FinalProducts from './pages/FinalProducts'
+import Suppliers from './pages/Suppliers'
+import Purchases from './pages/Purchases'
+import Infrastructure from './pages/Infrastructure'
 import Calculator from './pages/Calculator'
 import Recipes from './pages/Recipes'
 import RecipeDetail from './pages/RecipeDetail'
@@ -29,7 +34,12 @@ const App = () => {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
-              <Route path="/products" element={<Products />} />
+              <Route path="/ingredients" element={<Ingredients />} />
+              <Route path="/base-products" element={<BaseProducts />} />
+              <Route path="/final-products" element={<FinalProducts />} />
+              <Route path="/suppliers" element={<Suppliers />} />
+              <Route path="/purchases" element={<Purchases />} />
+              <Route path="/infrastructure" element={<Infrastructure />} />
               <Route path="/calculator" element={<Calculator />} />
               <Route path="/recipes" element={<Recipes />} />
               <Route path="/recipe/:id" element={<RecipeDetail />} />

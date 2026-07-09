@@ -1,5 +1,17 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Package, Calculator, Store, Settings, FileText } from 'lucide-react'
+import {
+  Home,
+  Package,
+  Boxes,
+  PackageCheck,
+  Truck,
+  ShoppingCart,
+  Factory,
+  ChefHat,
+  Calculator,
+  FileText,
+  Settings,
+} from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -17,9 +29,14 @@ import logoImg from '../assets/petiscosdasgeraisfrota-30-x-30-cm-1-copia-2-061c7
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: Home },
-  { name: 'Produtos', href: '/products', icon: Package },
+  { name: 'Insumos', href: '/ingredients', icon: Package },
+  { name: 'Produtos Base', href: '/base-products', icon: Boxes },
+  { name: 'Produtos Finais', href: '/final-products', icon: PackageCheck },
+  { name: 'Fornecedores', href: '/suppliers', icon: Truck },
+  { name: 'Compras', href: '/purchases', icon: ShoppingCart },
+  { name: 'Infraestrutura', href: '/infrastructure', icon: Factory },
+  { name: 'Fichas Técnicas', href: '/recipes', icon: ChefHat },
   { name: 'Calculadora', href: '/calculator', icon: Calculator },
-  { name: 'Fichas Técnicas', href: '/recipes', icon: Store },
   { name: 'Relatórios', href: '/reports', icon: FileText },
   { name: 'Configurações', href: '/settings', icon: Settings },
 ]

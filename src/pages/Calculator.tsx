@@ -13,12 +13,18 @@ import {
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/use-auth'
-import { createCalculation, updateCalculation, getCalculation } from '@/services/calculations'
+import {
+  createCalculation,
+  updateCalculation,
+  getCalculation,
+  getCalculations,
+  type CalculationRecord,
+} from '@/services/calculations'
 import { extractFieldErrors, getErrorMessage } from '@/lib/pocketbase/errors'
 import { formatCurrency } from '@/lib/utils'
 import { CalculatorForm } from '@/components/calculator-form'
 import { CalculatorSummary } from '@/components/calculator-summary'
-import { mockProducts, defaultProduct } from '@/data/mock-products'
+import { defaultProduct } from '@/data/mock-products'
 import { calculateAll } from '@/lib/pricing-engine'
 import type { ProductPricing } from '@/lib/pricing-types'
 
@@ -28,9 +34,17 @@ export default function Calculator() {
   const [form, setForm] = useState<ProductPricing>(defaultProduct)
   const [isSaving, setIsSaving] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [savedCalculations, setSavedCalculations] = useState<CalculationRecord[]>([])
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const result = useMemo(() => calculateAll(form), [form])
+
+  useEffect(() => {
+    if (!user) return
+    getCalculations(user.id)
+      .then(setSavedCalculations)
+      .catch(() => {})
+  }, [user])
 
   useEffect(() => {
     const editId = searchParams.get('edit')
@@ -56,9 +70,15 @@ export default function Calculator() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  const loadProduct = (productId: string) => {
-    const product = mockProducts.find((p) => p.id === productId)
-    if (product) setForm({ ...product })
+  const loadProduct = (calcId: string) => {
+    const calc = savedCalculations.find((c) => c.id === calcId)
+    if (calc) {
+      const data = calc.ingredients_list as ProductPricing | null
+      if (data) {
+        setForm({ ...data })
+        setEditingId(calc.id)
+      }
+    }
   }
 
   const handleNew = () => {
@@ -138,21 +158,21 @@ export default function Calculator() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Carregar Produto Existente</CardTitle>
+          <CardTitle className="text-base">Carregar Cálculo Salvo</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">
-              Selecione um produto para editar
+              Selecione um cálculo salvo para editar
             </Label>
             <Select onValueChange={loadProduct}>
               <SelectTrigger className="w-full md:w-96">
                 <SelectValue placeholder="Produto..." />
               </SelectTrigger>
               <SelectContent>
-                {mockProducts.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
+                {savedCalculations.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.product_name}
                   </SelectItem>
                 ))}
               </SelectContent>

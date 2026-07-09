@@ -2,7 +2,7 @@ import pb from '@/lib/pocketbase/client'
 import type { Packaging } from '@/types/system'
 
 export const getPackaging = () =>
-  pb.collection('packaging').getFullList({ sort: '-created' }) as Promise<Packaging[]>
+  pb.collection('packaging').getFullList({ sort: 'type' }) as Promise<Packaging[]>
 
 export const createPackaging = (data: Partial<Packaging>) => pb.collection('packaging').create(data)
 

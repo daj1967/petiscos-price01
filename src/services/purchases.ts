@@ -13,10 +13,3 @@ export const updatePurchase = (id: string, data: Partial<Purchase>) =>
   pb.collection('purchases').update(id, data)
 
 export const deletePurchase = (id: string) => pb.collection('purchases').delete(id)
-
-export const getPurchaseHistory = (ingredientId: string) =>
-  pb.collection('purchases').getFullList({
-    filter: `ingredient_id = "${ingredientId}"`,
-    sort: '-date',
-    expand: 'supplier_id',
-  }) as Promise<Purchase[]>

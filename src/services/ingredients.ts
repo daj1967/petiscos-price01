@@ -1,6 +1,8 @@
 import pb from '@/lib/pocketbase/client'
 import type { Ingredient } from '@/types/system'
 
+export type IngredientRecord = Ingredient
+
 export const getIngredients = () =>
   pb.collection('ingredients').getFullList({
     sort: '-created',
